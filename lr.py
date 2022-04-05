@@ -18,6 +18,8 @@ class Lrfs:
         self.b = np.random.randn()
         self.lr = lr
         self.epochs = epochs
+        self.min = None
+        self.range = None
 
     def plot_loss(self, losses):
         """Helper plotting loss vs epoch"""
@@ -31,6 +33,13 @@ class Lrfs:
         """
         work through epochs, refining w and b values
         """
+        # first, normalize
+        if self.min == None:
+            self.min = np.min(X, axis=0)
+            self.range = np.max(X, axis=0) - self.min
+        X_standardized = (X - self.min) / self.range
+        X = X_standardized
+
         all_costs = []
         for epoch in np.arange(self.epochs):
             predictions = self.predict(X)
