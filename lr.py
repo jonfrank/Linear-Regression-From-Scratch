@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from aicore.ml import data
 
 class Lrfs:
-    def __init__(self, n_features, epochs, lr):
+    def __init__(self, n_features, epochs, lr, batch_count=128):
         """
         set random starting points for w and b
         and parameters for epochs and learning rate
@@ -20,6 +20,7 @@ class Lrfs:
         self.epochs = epochs
         self.min = None
         self.range = None
+        self.batch_count = batch_count
 
     def plot_loss(self, losses):
         """Helper plotting loss vs epoch"""
@@ -40,12 +41,16 @@ class Lrfs:
         X_standardized = (X - self.min) / self.range
         X = X_standardized
 
+        X_batches = np.array_split(X, self.batch_count)
+        y_batches = np.array_split(y, self.batch_count)
+
         all_costs = []
         for epoch in np.arange(self.epochs):
-            predictions = self.predict(X)
-            new_W, new_b = self._step(self.W, self.b, X, predictions, y)
-            self._update_params(new_W, new_b)
-            cost = self.mse_loss(predictions, y)
+            for batch in np.arange(self.batch_count):
+                predictions = self.predict(X_batches[batch])
+                new_W, new_b = self._step(self.W, self.b, X_batches[batch], predictions, y_batches[batch])
+                self._update_params(new_W, new_b)
+            cost = self.mse_loss(self.predict(X), y)
             all_costs.append(cost)
         
         self.plot_loss(all_costs)
